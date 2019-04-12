@@ -59,6 +59,22 @@ Debug mode
 To-Do
 
 ### Running
+```/path/to/bot/gc_telegram_bot```
+#### Supervisor
+*/etc/supervisord.d/gc_bot.ini* 
+```
+[program:gc_telegram_bot]
+command=/path/to/bot/gc_telegram_bot
+stdout_logfile=/path/to/bot/gc_telegram_bot.log
+redirect_stderr=true
+autostart=true
+autorestart=true
+stopsignal=TERM
+stopwaitsecs=10
+environment=GC_TOKEN=PRIVATE_TOKEN
+```
+#### Systemd
+to-do
 
 ## Bot Commands
 /help 		-- print this message  
@@ -70,3 +86,6 @@ To-Do
 /stop		-- !!! Delete all messages, delete settings and stop the bot !!!  
 
 ## To-Do List
+* Add http proxy support
+* Add configuration file
+
