@@ -90,7 +90,7 @@ func parseSetting(rawData map[string]string) *botSetting {
 				log.Fatal("Bot debug must be boolean")
 			}
 			setting.botDebug = debug
-		case "gc_timeout":
+		case "gc_check_timeout":
 			timeoutInt, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal("Invalid garbage collector timeout")
