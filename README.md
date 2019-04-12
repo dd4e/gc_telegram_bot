@@ -10,7 +10,7 @@ The bot only saves the message metadata. Radis is used as a backend for storing 
 ### Installation
 ```
 go get github.com/dadmoscow/gc_telegram_bot
-go build gc_telegram_bot
+go build github.com/dadmoscow/gc_telegram_bot
 ```
 
 ### Configuration
