@@ -61,7 +61,7 @@ To-Do
 ### Running
 ```/path/to/bot/gc_telegram_bot```
 #### Supervisor
-*/etc/supervisord.d/gc_bot.ini* 
+*/etc/supervisord.d/gc_telegram_bot.ini* 
 ```
 [program:gc_telegram_bot]
 command=/path/to/bot/gc_telegram_bot
