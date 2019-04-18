@@ -17,13 +17,15 @@ var (
 	CONFIGS Configs
 	VERSION string
 	SETTING *botSetting
+	SOURCE  *string
 )
 
 func init() {
-	VERSION = "0.1"
+	VERSION = "0.2"
 
 	version := flag.Bool("version", false, "Print version")
 	command := flag.Bool("manual", false, "Print bot manual")
+	SOURCE = flag.String("setting", "", "Use setting from config file")
 	flag.Parse()
 
 	if *version {
@@ -37,8 +39,16 @@ func init() {
 
 func main() {
 	log.Printf("*** Garbage Collector Bot. Version: %s ***", VERSION)
+
 	// load SETTING
-	SETTING = parseSetting(loadSettingFromEnv())
+	if len(*SOURCE) > 0 {
+		log.Print("Loading setting from file ", *SOURCE)
+		SETTING = parseSetting(loadSettingFromFile(*SOURCE))
+	} else {
+		log.Print("Loading setting from system environment")
+		SETTING = parseSetting(loadSettingFromEnv())
+	}
+
 	log.Printf("Bot setting: %s", SETTING)
 
 	DB = redis.NewClient(&redis.Options{

@@ -56,7 +56,7 @@ Debug mode
 *Default*: false  
 
 #### Configuration file
-To-Do
+```gc_telegram_bot --setting /path/to/setting.json```
 
 ### Running
 ```/path/to/bot/gc_telegram_bot```

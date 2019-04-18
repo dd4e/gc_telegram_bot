@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"golang.org/x/net/proxy"
 	"log"
@@ -166,8 +167,35 @@ func loadSettingFromEnv() map[string]string {
 	return settingMap
 }
 
-// todo
-//func loadSettingFromFile() botSetting {}
+// load setting from config file
+func loadSettingFromFile(file string) map[string]string {
+	var rawJSON map[string]string
+
+	jsonConfig, err := os.Open(file)
+	if err != nil {
+		log.Fatal("Error occurred with loading config file", err)
+	}
+
+	defer func() {
+		if err := jsonConfig.Close(); err != nil {
+			log.Print("Error occurred with closing config file", err)
+		}
+	}()
+
+	decode := json.NewDecoder(jsonConfig)
+	if err := decode.Decode(&rawJSON); err != nil {
+		log.Fatal("Error occurred with decode config file", err)
+	}
+
+	settingMap := make(map[string]string, len(rawJSON))
+
+	for key, value := range rawJSON {
+		newKey := strings.ToLower(key)
+		settingMap[newKey] = value
+	}
+
+	return settingMap
+}
 
 // todo:
 //func httpsProxyClient() {}

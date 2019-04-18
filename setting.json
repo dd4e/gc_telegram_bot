@@ -1,0 +1,13 @@
+{
+  "GC_Token":         "BOT_TOKEN",
+  "GC_Bot_Debug":     "true",
+  "GC_Check_Timeout": "60",
+  "GC_Timeout_Limit": "604800",
+  "GC_Redis_Addr":    "127.0.0.1:6379",
+  "GC_Redis_DB":      "0",
+  "GC_Redis_Pwd":     "",
+  "GC_Use_SOCKS5":    "false",
+  "GC_SOCKS5_User":   "",
+  "GC_SOCKS5_Pwd":    "",
+  "GC_SOCKS5_Addr":   ""
+}
