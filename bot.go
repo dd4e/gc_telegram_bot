@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/go-redis/redis"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"os"
@@ -12,7 +11,7 @@ import (
 )
 
 var (
-	DB      *redis.Client
+	DB      redisDB
 	BOT     *tgbotapi.BotAPI
 	CONFIGS Configs
 	VERSION string
@@ -51,14 +50,13 @@ func main() {
 
 	log.Printf("Bot setting: %s", SETTING)
 
-	DB = redis.NewClient(&redis.Options{
-		DB:       SETTING.dbRedisDB,
+	DB = redisDB{
+		numDB:    SETTING.dbRedisDB,
 		Addr:     SETTING.dbRedisAddress,
 		Password: SETTING.dbRedisPassword,
-	})
+	}
 
-	// try ping redis
-	_, err := DB.Ping().Result()
+	err := DB.Connect()
 	if err != nil {
 		log.Fatal("Error occurred with connect to Redis:", err)
 	}

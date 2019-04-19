@@ -43,7 +43,7 @@ func (msg tMessage) Delete() {
 
 	// delete from Redis
 	key := fmt.Sprintf("msg_%d_%d", msg.ChatID, msg.MsgID)
-	if err := DeleteFromDB(key); err != nil {
+	if err := DB.DeleteFromDB(key); err != nil {
 		log.Printf("Error: message %s has not been deleted from redis: %s", msg, err)
 	}
 }
@@ -61,7 +61,7 @@ func (msg tMessage) IsOutdated() bool {
 func (msg tMessage) Save() bool {
 	jsonMessage, _ := json.Marshal(msg)
 	key := fmt.Sprintf("msg_%d_%d", msg.ChatID, msg.MsgID)
-	if err := SaveToDB(key, jsonMessage); err != nil {
+	if err := DB.SaveToDB(key, jsonMessage); err != nil {
 		log.Println("Failed to save message:", err)
 		return false
 	}
@@ -88,7 +88,7 @@ func (cnf tChatConfig) String() string {
 func (cnf tChatConfig) Save() bool {
 	jsonConfig, _ := json.Marshal(cnf)
 	key := fmt.Sprintf("chat_%d", cnf.ChatID)
-	if err := SaveToDB(key, jsonConfig); err != nil {
+	if err := DB.SaveToDB(key, jsonConfig); err != nil {
 		log.Println("Failed to save message:", err)
 		return false
 	}
@@ -127,7 +127,7 @@ func (cnf tChatConfig) IsEnabled() bool {
 // delete configuration method
 func (cnf tChatConfig) DeleteConfig() bool {
 	key := fmt.Sprintf("chat_%d", cnf.ChatID)
-	err := DeleteFromDB(key)
+	err := DB.DeleteFromDB(key)
 	if err != nil {
 		log.Printf("Failed to delete chat %s configuration: %s", cnf, err)
 		return false
@@ -138,7 +138,7 @@ func (cnf tChatConfig) DeleteConfig() bool {
 // method getting all message for chat
 func (cnf tChatConfig) GetAllChatMessage() []tMessage {
 	key := fmt.Sprintf("msg_%d_*", cnf.ChatID)
-	jsonMessages, err := LoadFromDB(key)
+	jsonMessages, err := DB.LoadFromDB(key)
 	if err != nil {
 		log.Printf("Error occurred with loading all chat %s messages: %s", cnf, err)
 		return make([]tMessage, 0)
@@ -191,7 +191,7 @@ func (c Configs) ExistAndEnable(chatID int64) bool {
 
 // get all messages for all chats
 func GetAllMessages(configs Configs) []tMessage {
-	jsonMessages, err := LoadFromDB("msg_*")
+	jsonMessages, err := DB.LoadFromDB("msg_*")
 	if err != nil {
 		log.Println("Error occurred with loading all messages:", err)
 		return make([]tMessage, 0)
@@ -245,7 +245,7 @@ func NewChatConfig(chatID int64, timeout int, title string) *tChatConfig {
 // get all chat configuration
 func GetChatConfigs() Configs {
 	chatConfigs := make(Configs)
-	values, err := LoadFromDB("chat_*")
+	values, err := DB.LoadFromDB("chat_*")
 	if err != nil {
 		log.Println("Error occurred with loading chat configurations", err)
 		return chatConfigs
