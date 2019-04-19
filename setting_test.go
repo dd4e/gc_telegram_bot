@@ -44,7 +44,7 @@ func TestParseSettingFromEnv(t *testing.T) {
 
 	setting := parseSetting(loadSettingFromEnv())
 
-	if !(*setting == testSetting) {
+	if *setting != testSetting {
 		t.Error("Error with compare setting")
 	}
 }
@@ -63,7 +63,7 @@ func TestParseFromFile(t *testing.T) {
 
 	setting := parseSetting(loadSettingFromFile("setting.json"))
 
-	if !(*setting == testSetting) {
+	if *setting != testSetting {
 		t.Error("Error with compare setting from file")
 	}
 }
