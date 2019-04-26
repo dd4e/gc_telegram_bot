@@ -36,8 +36,8 @@ func init() {
 func main() {
 	log.Printf("*** Garbage Collector BotAPI. Version: %s ***", VERSION)
 
-	var setting *app.BotSetting
-	var GCBot *app.BotApp
+	setting := app.BotSetting{}
+	GCBot := app.BotApp{}
 
 	// load SETTING
 	if len(*SOURCE) > 0 {

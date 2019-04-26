@@ -17,8 +17,8 @@ type BotApp struct {
 	setting *BotSetting
 }
 
-func (b *BotApp) Init(setting *BotSetting) {
-	b.setting = setting
+func (b *BotApp) Init(setting BotSetting) {
+	b.setting = &setting
 
 	// init db connection
 	b.DB.Addr = setting.RedisAddress
