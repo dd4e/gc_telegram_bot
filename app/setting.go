@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"encoding/json"
@@ -12,46 +12,21 @@ import (
 	"time"
 )
 
-const HelpMsg = `
-Supported command:
-/help 		-- print this message
-/on   		-- the bot will delete outdated messages
-/off		-- the bot will be disabled
-/timeout	-- new timeout after which the messages will be deleted
-/delete		-- delete all messages
-/setting	-- print current settings
-/stop		-- !!! Delete all messages, delete settings and stop the bot !!!
-
-Timeout format:
-Timeout is set in the format: <decimal><unit suffix>
-unit suffix one of "s", "m", "h"
-Example: 1h15m, 24h, 30m, 60s, 10h30m15s
-`
-
-const StartMsg = `
-Instructions to get started:
-1. Add bot to group
-2. Give him admin rights to delete messages
-3. In the group send a command to the bot /on to run
-4. You can change the timeout setting
-5. To get the list command send /help
-`
-
 // bot setting type
-type botSetting struct {
-	botToken        string
-	botDebug        bool
-	gcTimeout       time.Duration
-	dbRedisAddress  string
-	dbRedisDB       int
-	dbRedisPassword string
-	useSocksProxy   bool
-	socksParams     struct {
-		socksAddress  string
-		socksUser     string
-		socksPassword string
+type BotSetting struct {
+	BotToken      string
+	BotDebug      bool
+	SleepTimeout  time.Duration
+	RedisAddress  string
+	RedisDB       int
+	RedisPassword string
+	UseSocksProxy bool
+	SocksParams   struct {
+		SocksAddress  string
+		SocksUser     string
+		SocksPassword string
 	}
-	timeoutLimit int
+	TimeoutLimit int
 	// todo:
 	//useHTTPSProxy bool
 	//httpsParams struct{
@@ -61,26 +36,24 @@ type botSetting struct {
 	//}
 }
 
-func (s botSetting) String() string {
-	return fmt.Sprint("botDebug:", s.botDebug,
-		", gcTimeout:", int(s.gcTimeout),
-		", dbRedisAddress:", s.dbRedisAddress,
-		", dbRedisDB:", s.dbRedisDB,
-		", useSocksProxy:", s.useSocksProxy,
-		", socksAddress:", s.socksParams.socksAddress,
-		", socksUser:", s.socksParams.socksUser,
-		", timeoutLimit:", s.timeoutLimit)
+func (s BotSetting) String() string {
+	return fmt.Sprint("BotDebug:", s.BotDebug,
+		", SleepTimeout:", int(s.SleepTimeout),
+		", RedisAddress:", s.RedisAddress,
+		", DBHandlers:", s.RedisDB,
+		", UseSocksProxy:", s.UseSocksProxy,
+		", SocksAddress:", s.SocksParams.SocksAddress,
+		", SocksUser:", s.SocksParams.SocksUser,
+		", TimeoutLimit:", s.TimeoutLimit)
 }
 
 // parsing and create setting
-func parseSetting(rawData map[string]string) *botSetting {
-	var setting botSetting
-
+func (s *BotSetting) Load(rawData map[string]string) {
 	// if token not set
 	if _, ok := rawData["gc_token"]; !ok {
-		log.Fatal("Bot token not set!")
+		log.Fatal("BotAPI token not set!")
 	} else {
-		setting.botToken = rawData["gc_token"]
+		s.BotToken = rawData["gc_token"]
 	}
 
 	for key, value := range rawData {
@@ -88,51 +61,51 @@ func parseSetting(rawData map[string]string) *botSetting {
 		case "gc_bot_debug":
 			debug, err := strconv.ParseBool(value)
 			if err != nil {
-				log.Fatal("Bot debug must be boolean")
+				log.Fatal("BotAPI debug must be boolean")
 			}
-			setting.botDebug = debug
+			s.BotDebug = debug
 		case "gc_check_timeout":
 			timeoutInt, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal("Invalid garbage collector timeout")
 			}
-			setting.gcTimeout = time.Duration(timeoutInt)
+			s.SleepTimeout = time.Duration(timeoutInt)
 		case "gc_redis_addr":
-			setting.dbRedisAddress = value
+			s.RedisAddress = value
 		case "gc_redis_db":
 			db, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal("Invalid redis DB number")
 			}
-			setting.dbRedisDB = db
+			s.RedisDB = db
 		case "gc_redis_pwd":
-			setting.dbRedisPassword = value
+			s.RedisPassword = value
 		case "gc_use_socks5":
 			useSOCKS5Bool, err := strconv.ParseBool(value)
 			if err != nil {
 				log.Fatal("Use socks5 must be boolean")
 			}
-			setting.useSocksProxy = useSOCKS5Bool
+			s.UseSocksProxy = useSOCKS5Bool
 		case "gc_socks5_user":
-			setting.socksParams.socksUser = value
+			s.SocksParams.SocksUser = value
 		case "gc_socks5_pwd":
-			setting.socksParams.socksPassword = value
+			s.SocksParams.SocksPassword = value
 		case "gc_socks5_addr":
-			setting.socksParams.socksAddress = value
+			s.SocksParams.SocksAddress = value
 		case "gc_timeout_limit":
 			timeout, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal("Invalid timeout limit")
 			}
-			setting.timeoutLimit = timeout
+			s.TimeoutLimit = timeout
 		}
 	}
 
 	// check socks5 settings
-	if setting.useSocksProxy {
-		for _, socksParam := range []string{setting.socksParams.socksAddress,
-			setting.socksParams.socksPassword,
-			setting.socksParams.socksUser} {
+	if s.UseSocksProxy {
+		for _, socksParam := range []string{s.SocksParams.SocksAddress,
+			s.SocksParams.SocksPassword,
+			s.SocksParams.SocksUser} {
 			if len(socksParam) == 0 {
 				log.Fatal("Not enough parameters to configure SOCKS5 proxy")
 			}
@@ -140,25 +113,23 @@ func parseSetting(rawData map[string]string) *botSetting {
 	}
 
 	// setup default gc timeout
-	if setting.gcTimeout == 0 {
-		setting.gcTimeout = 60
+	if s.SleepTimeout == 0 {
+		s.SleepTimeout = 60
 	}
 
 	// set default timeout limit
-	if setting.timeoutLimit == 0 {
-		setting.timeoutLimit = 604800
+	if s.TimeoutLimit == 0 {
+		s.TimeoutLimit = 604800
 	}
 
 	// setup default redis
-	if len(setting.dbRedisAddress) == 0 {
-		setting.dbRedisAddress = "127.0.0.1:6379"
+	if len(s.RedisAddress) == 0 {
+		s.RedisAddress = "127.0.0.1:6379"
 	}
-
-	return &setting
 }
 
 // loading setting from system env
-func loadSettingFromEnv() map[string]string {
+func LoadSettingFromEnv() map[string]string {
 	settingMap := make(map[string]string)
 	for _, item := range os.Environ() {
 		setting := strings.Split(item, "=")
@@ -168,7 +139,7 @@ func loadSettingFromEnv() map[string]string {
 }
 
 // load setting from config file
-func loadSettingFromFile(file string) map[string]string {
+func LoadSettingFromFile(file string) map[string]string {
 	var rawJSON map[string]string
 
 	jsonConfig, err := os.Open(file)
@@ -198,10 +169,10 @@ func loadSettingFromFile(file string) map[string]string {
 }
 
 // todo:
-//func httpsProxyClient() {}
+//func HTTPProxyClient() {}
 
 // creates http.Client connection through SOCKS5 proxy
-func socksProxyClient(address, user, password string) *http.Client {
+func SOCKS5ProxyClient(address, user, password string) *http.Client {
 	socksAuth := proxy.Auth{User: user, Password: password}
 	dialSocksProxy, err := proxy.SOCKS5(
 		"tcp",

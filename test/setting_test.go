@@ -1,6 +1,7 @@
-package main
+package test
 
 import (
+	"gc_telegram_bot"
 	"os"
 	"testing"
 )
@@ -61,7 +62,7 @@ func TestParseFromFile(t *testing.T) {
 		timeoutLimit:    604800,
 	}
 
-	setting := parseSetting(loadSettingFromFile("setting.json"))
+	setting := parseSetting(loadSettingFromFile("config.json"))
 
 	if *setting != testSetting {
 		t.Error("Error with compare setting from file")
