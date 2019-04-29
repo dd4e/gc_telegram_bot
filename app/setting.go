@@ -64,7 +64,7 @@ func (s *BotSetting) Load(rawData map[string]string) {
 				log.Fatal("BotAPI debug must be boolean")
 			}
 			s.BotDebug = debug
-		case "gc_check_timeout":
+		case "gc_sleep_timeout":
 			timeoutInt, err := strconv.Atoi(value)
 			if err != nil {
 				log.Fatal("Invalid garbage collector timeout")
