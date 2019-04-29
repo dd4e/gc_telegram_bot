@@ -1,6 +1,9 @@
 package data
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 var testChat = Chat{
 	ChatID:       12345,
@@ -25,9 +28,14 @@ func TestChangeTimeout(t *testing.T) {
 }
 
 func TestExportToDB(t *testing.T) {
-	testChat.ExportToDB()
+	key, value := testChat.ExportToDB()
+	if len(key) == 0 && len(value) == 0 {
+		t.Error("error with export to db")
+	}
 }
 
 func TestDBKey(t *testing.T) {
-	testChat.DBKey()
+	if testChat.DBKey() != fmt.Sprintf("chat_%d", testChat.ChatID) {
+		t.Error("db key error")
+	}
 }
