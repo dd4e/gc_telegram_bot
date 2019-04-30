@@ -1,7 +1,8 @@
 package data
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -26,15 +27,20 @@ func TestMessage_IsOutdated(t *testing.T) {
 }
 
 func TestMessage_DBKey(t *testing.T) {
-	key := fmt.Sprintf("msg_%d_%d", testMessage.ChatID, testMessage.MsgID)
-	if testMessage.DBKey() != key {
+	if testMessage.DBKey() != "msg_12345_123" {
 		t.Error("error db key")
 	}
 }
 
 func TestMessage_ExportToDB(t *testing.T) {
 	key, value := testMessage.ExportToDB()
-	if len(key) == 0 && len(value) == 0 {
-		t.Error("error with export to db")
+
+	if key != "msg_12345_123" {
+		t.Error("export db error: key")
+	}
+
+	testJSON, _ := json.Marshal(testMessage)
+	if !bytes.Equal(value, testJSON) {
+		t.Error("export db error: value")
 	}
 }
