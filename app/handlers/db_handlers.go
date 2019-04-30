@@ -47,19 +47,19 @@ func (db *DBHandlers) Connect() error {
 }
 
 func (db DBHandlers) SaveData(d DBMethods) error {
-	return db.Set(d.ExportToDB())
+	return db.set(d.ExportToDB())
 }
 
 func (db DBHandlers) DeleteData(d DBMethods) error {
-	return db.Delete(d.DBKey())
+	return db.delete(d.DBKey())
 }
 
 func (db DBHandlers) LoadData(d DBMethods) ([]string, error) {
-	return db.Get(d.DBKey())
+	return db.get(d.DBKey())
 }
 
 // save key value to Redis
-func (db DBHandlers) Set(key string, value []byte) error {
+func (db DBHandlers) set(key string, value []byte) error {
 	err := db.client.Set(key, value, 0).Err()
 	if err != nil {
 		log.Println("Error occurred with save to Redis:", err)
@@ -69,7 +69,7 @@ func (db DBHandlers) Set(key string, value []byte) error {
 }
 
 // load data from Redis by filtered key
-func (db DBHandlers) Get(filter string) ([]string, error) {
+func (db DBHandlers) get(filter string) ([]string, error) {
 	keys, err := db.client.Keys(filter).Result()
 	if err != nil {
 		log.Println("Error occurred with loading data from Redis:", err)
@@ -91,7 +91,7 @@ func (db DBHandlers) Get(filter string) ([]string, error) {
 }
 
 // delete value by key from Redis
-func (db DBHandlers) Delete(key string) error {
+func (db DBHandlers) delete(key string) error {
 	err := db.client.Del(key).Err()
 	if err != nil {
 		log.Printf("Error occurred with deleting value by key %s: %s", key, err)
@@ -104,7 +104,7 @@ func (db DBHandlers) Delete(key string) error {
 func (db DBHandlers) GetAllConfigs() data.Configs {
 	chatConfigs := make(data.Configs)
 
-	values, err := db.Get("chat_*")
+	values, err := db.get("chat_*")
 	if err != nil {
 		log.Println("Error occurred with loading chat configurations", err)
 		return chatConfigs
@@ -126,7 +126,7 @@ func (db DBHandlers) GetAllConfigs() data.Configs {
 // method getting all message for chat
 func (db DBHandlers) GetAllChatMessage(chat data.Chat) []data.Message {
 	key := fmt.Sprintf("msg_%d_*", chat.ChatID)
-	jsonMessages, err := db.Get(key)
+	jsonMessages, err := db.get(key)
 	if err != nil {
 		log.Printf("Error occurred with loading all chat %s messages: %s", chat, err)
 		return make([]data.Message, 0)
@@ -153,7 +153,7 @@ func (db DBHandlers) GetAllChatMessage(chat data.Chat) []data.Message {
 
 // get all messages for all chats
 func (db DBHandlers) GetAllMessages(configs data.Configs) []data.Message {
-	jsonMessages, err := db.Get("msg_*")
+	jsonMessages, err := db.get("msg_*")
 	if err != nil {
 		log.Println("Error occurred with loading all messages:", err)
 		return make([]data.Message, 0)
